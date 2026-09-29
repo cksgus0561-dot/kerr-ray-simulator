@@ -1,0 +1,73 @@
+# Rebuildable binaries, local dependency/toolchain copies and temporary work.
+/target/
+/bin/
+/vendor/
+/vendor_viz/
+/.build-temp/
+/.cargo-home/
+/.rustup/
+/tools/
+/migration_audit/
+/migration_tools/
+/logs/
+/.cache/
+/cache/
+/tmp/
+/rustup/
+/cargo/
+/.codex/
+/.agents/
+/.idea/
+/.vscode/
+/.env
+/.env.*
+__pycache__/
+*.pyc
+simulation_*/
+
+# Preserve the small standalone validation/dependency-maintenance scripts only.
+/work/*
+!/work/*.py
+
+# Validation sources and written reports are kept; raw outputs/logs are not.
+/validation/**
+!/validation/**/
+!/validation/**/*.py
+!/validation/**/*.ps1
+!/validation/**/*.rs
+!/validation/**/*.md
+!/validation/baseline_37_hashes.json
+!/validation/baseline_preserved.json
+
+# This small archive is read directly by examples/signed_spin_validation.rs.
+!/validation/parallel_measurements_20260926/larger/simulation_1/
+!/validation/parallel_measurements_20260926/larger/simulation_1/common.json
+!/validation/parallel_measurements_20260926/larger/simulation_1/sim_1.bin
+
+# Output directories are excluded except the exact existing regression oracles.
+/results/*
+!/results/source_to_detector/
+/results/source_to_detector/*
+!/results/source_to_detector/run_metadata.json
+!/results/source_to_detector/detector_events.csv
+!/results/source_to_detector/ray_diagnostics.csv
+!/results/source_to_detector/detector_hit_states.csv
+!/results/visualization_4096/
+/results/visualization_4096/*
+!/results/visualization_4096/run_metadata.json
+!/results/visualization_4096/detector_events.csv
+!/results/visualization_4096/ray_diagnostics.csv
+!/results/visualization_4096/detector_hit_states.csv
+
+# Small seed/archive reference used by examples/ray_parallel_benchmark.rs.
+!/results/seeded_validation_20260925/
+/results/seeded_validation_20260925/*
+!/results/seeded_validation_20260925/new/
+/results/seeded_validation_20260925/new/*
+!/results/seeded_validation_20260925/new/simulation_1/
+/results/seeded_validation_20260925/new/simulation_1/*
+!/results/seeded_validation_20260925/new/simulation_1/common.json
+!/results/seeded_validation_20260925/new/simulation_1/sim_1.bin
+
+# vendor_viz may remain locally as an offline copy; builds use crates.io/Cargo.lock.
+# tests/fixtures includes intentional small CSV/JSON/legacy Parquet references.

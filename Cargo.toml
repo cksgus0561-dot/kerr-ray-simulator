@@ -1,0 +1,28 @@
+[package]
+name = "kerr-ray"
+version = "0.3.0"
+edition = "2024"
+description = "Kerr null geodesics and continuous-time detector research data"
+license = "MIT"
+default-run = "kerr-ray"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+csv = "1"
+png = "0.18"
+eframe = { version = "0.36.2", default-features = false, features = ["default_fonts", "wgpu"] }
+glam = { version = "0.30", features = ["serde"] }
+bytemuck = { version = "1", features = ["derive"] }
+flate2 = "1"
+parquet = { version = "=59.3.0", default-features = false, features = ["snap"] }
+getrandom = "=0.4.3"
+rand_chacha = "=0.9.0"
+rand_core = "=0.9.3"
+sha2 = "=0.10.9"
+
+[profile.release]
+debug = true
+
+[lints.rust]
+unsafe_code = "forbid"

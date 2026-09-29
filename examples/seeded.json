@@ -1,0 +1,40 @@
+{
+  "generator": {
+    "ray_generator_version": "stratified-cartesian-v1",
+    "rng_algorithm": "ChaCha20 (rand_chacha 0.9.0), 256-bit key, stream=0, word_pos=0; next_u64 low-u32 first",
+    "seed_bits": 256,
+    "uniform_f64_rule": "(next_u64() >> 11) as f64 * 2^-53; two calls per cell: axis_1 then axis_2",
+    "cell_order": "axis_2 outer j=0..n2, axis_1 inner i=0..n1; results in prepare_rays canonical order",
+    "center": [
+      80.0,
+      0.0,
+      0.0
+    ],
+    "axis_1": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "axis_2": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "cell_size": [
+      0.5,
+      0.5
+    ],
+    "cell_count": [
+      192,
+      192
+    ],
+    "fixed_direction": [
+      -1.0,
+      0.0,
+      0.0
+    ],
+    "t_emit": 0.0,
+    "position_sampling": "one uniform point per cell",
+    "direction_noise": "none"
+  }
+}

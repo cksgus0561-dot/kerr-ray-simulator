@@ -1,0 +1,3 @@
+# Preserve exact verified bytes: Cargo vendor checksums and build.rs source
+# fingerprints must not change because of a developer's core.autocrlf setting.
+* -text

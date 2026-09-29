@@ -1,0 +1,17 @@
+{
+  "tests/dataset_output.rs": "77c82622340d72c547334ad9fc47be0f9f63221aedba3d010666d8f9abccc6dc",
+  "tests/detector.rs": "253e343a452e56c3f116f61d5fcd0de95679b408ab0dbd5a34855a269677a0c3",
+  "tests/experiments.rs": "d1f7d069b78065525ee5415f9736165d7f92b25d59a4dad7fb1f8e28427d36fb",
+  "tests/geodesics.rs": "71492e72b3bc5d0b79a9f96daf265f529c092108ac6a97726f22e873c946af87",
+  "tests/metric.rs": "a7770eb73cea1bf073f8768ce93c22c9d0ecf7a79a44f74dac19a90a533dd1e8",
+  "tests/three_dimensional.rs": "16032b142eafbc75fecfa2bb185606fef381760e1972e85e0966508f49b8c621",
+  "src/physics/constants.rs": "0fbd1c89d325df81fb4ca9f995a9268ae7701ba97c4d044b86d475c48d5a5862",
+  "src/physics/coordinates.rs": "306f2309626a10a3c3fb1be21a6ae3758bb634df3a51555784e979b9d19041d8",
+  "src/physics/geodesic.rs": "5775deaef8a494cca82910f74be07c2e0753b7957256c2d702766504913286d2",
+  "src/physics/integrator.rs": "c4d29fab8efc4e8ad46653fd6f1e16e6d93cf6e7006dc70d96a4a9f15284d53c",
+  "src/physics/kerr.rs": "6f70d343171dca08732fe5b4b5c850c5ab3fdfb81f96003f47c75c625c3873be",
+  "src/physics/metric.rs": "289dc5f03995a3cd515e3833900647eac5549b91064a799ca946646c125ce868",
+  "src/physics/mod.rs": "21ed50900e5da4b31ee9b2a45380938ecec4d90c89fa4d2b76b70f445f0be179",
+  "src/physics/tetrad.rs": "fe6d5a33a43e60369408c48608d08122e55ef4eefd7913935702d4999c1022bf",
+  "src/physics/validation.rs": "51512cacdfd738fd82816ef60d1c24ee0fd5db2dd881a61c67a0513bc802a65d"
+}

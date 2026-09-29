@@ -1,0 +1,131 @@
+{
+  "G": 1.0,
+  "M": 1.0,
+  "build_mode": "release",
+  "build_source_fnv1a64": "d29068dbfd75eff1",
+  "c": 1.0,
+  "code_version": "0.2.0",
+  "coordinates": "Boyer-Lindquist (t,r,theta,phi), signature (-,+,+,+)",
+  "date_encoding": "seconds since 1970-01-01T00:00:00Z (UTC)",
+  "detector": "absorbing, first valid transverse crossing; both rectangle edges included",
+  "events_fnv1a64": "6d7ce5a78b31e7e9",
+  "executed_at_unix_seconds": 1789446362.7775054,
+  "experiment": {
+    "detector": {
+      "plane": {
+        "center": [
+          -80.0,
+          0.0,
+          0.0
+        ],
+        "e_u": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "e_v": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "height": 300.0,
+        "normal": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "width": 300.0
+      },
+      "resolution": [
+        128,
+        128
+      ],
+      "root_tolerance": 1e-10
+    },
+    "integration": {
+      "atol": 1e-14,
+      "escape_radius": 400.0,
+      "horizon_epsilon": 0.001,
+      "initial_step": 0.05,
+      "max_affine": 1500.0,
+      "max_step": 0.5,
+      "max_steps": 200000,
+      "min_step": 1e-12,
+      "null_tolerance": 0.00001,
+      "rtol": 1e-12
+    },
+    "output": "results/source_to_detector",
+    "postprocess": {
+      "basis": "Arrival",
+      "counts_per_white": 4,
+      "end": null,
+      "playback_fps": 30,
+      "start": null,
+      "time_bin_width": 1.0
+    },
+    "source": {
+      "direction": {
+        "CartesianSpatial": [
+          -1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "local_energy": 1.0,
+      "pattern": {
+        "RectangularGrid": {
+          "nu": 16,
+          "nv": 16
+        }
+      },
+      "plane": {
+        "center": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "e_u": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "e_v": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "height": 32.0,
+        "normal": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "width": 32.0
+      },
+      "t_emit": 0.0
+    },
+    "spin": 0.6
+  },
+  "integrator": "CPU f64 Dormand-Prince 5(4), adaptive; 8 canonical variables; no constraint projection",
+  "max_errors": {
+    "E_relative": 0.0,
+    "Lz_relative": 0.0,
+    "Q_abs": 2.9331204132176936e-10,
+    "Q_relative": 4.821476021564952e-12,
+    "null_abs": 1.1393694876460359e-8
+  },
+  "outcomes": {
+    "Active": 0,
+    "Captured": 20,
+    "Detected": 216,
+    "Escaped": 20,
+    "NumericalFailure": 0
+  },
+  "physics_and_primary_output_seconds": 0.2310397,
+  "physics_seconds": 0.2116860000000001,
+  "plane_map": "X=sqrt(r^2+a^2)*sin(theta)*cos(phi), Y=sqrt(r^2+a^2)*sin(theta)*sin(phi), Z=r*cos(theta); T=t_BL; NOT Kerr-Schild",
+  "plane_worldlines": "fixed Cartesian-like BL coordinates; guaranteed static timelike exterior r>2; coordinate areas, not proper areas",
+  "ray_count": 256,
+  "schema_version": 2,
+  "time_convention": "f64 t_hit=t_BL; delta_t=t_hit-t_emit; affine parameter is not photon proper time"
+}

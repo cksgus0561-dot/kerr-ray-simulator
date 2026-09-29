@@ -1,0 +1,51 @@
+{
+  "numerics": {
+    "rtol": 1e-12,
+    "atol": 1e-14,
+    "initial_step": 0.05,
+    "min_step": 1e-12,
+    "max_step": 0.5,
+    "max_steps": 200000,
+    "max_affine": 1500.0,
+    "horizon_epsilon": 0.001,
+    "escape_radius": 400.0,
+    "null_tolerance": 0.00001,
+    "detector_root_tolerance": 1e-10
+  },
+  "detector": {
+    "center": [
+      -80.0,
+      0.0,
+      0.0
+    ],
+    "normal": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "e_u": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "e_v": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "width": 300.0,
+    "height": 300.0
+  },
+  "convention": {
+    "G": 1.0,
+    "c": 1.0,
+    "M": 1.0,
+    "origin": "Kerr mass center",
+    "spin_axis": "+z",
+    "handedness": "right-handed",
+    "ray_coordinate_convention": "Oblate Cartesian-like Boyer-Lindquist: X=sqrt(r^2+a^2)*sin(theta)*cos(phi); Y=sqrt(r^2+a^2)*sin(theta)*sin(phi); Z=r*cos(theta); T=t_BL; CartesianSpatial direction; signature (-,+,+,+); local ZAMO energy=1"
+  },
+  "simulator_version": "0.3.0",
+  "data_format_version": "1",
+  "build_source_fnv1a64": "01deb56dccf4435f"
+}

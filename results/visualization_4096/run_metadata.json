@@ -1,0 +1,126 @@
+{
+  "G": 1,
+  "M": 1,
+  "build_source_fnv1a64": "6302007bbe02061a",
+  "c": 1,
+  "code_version": "0.3.0",
+  "coordinates": "Boyer-Lindquist (t,r,theta,phi); signature (-,+,+,+)",
+  "events_fnv1a64": "2994f7a166ce2e93",
+  "executed_at_unix_seconds": 1789452273.8715296,
+  "experiment": {
+    "detector": {
+      "plane": {
+        "center": [
+          -80.0,
+          0.0,
+          0.0
+        ],
+        "e_u": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "e_v": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "height": 300.0,
+        "normal": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "width": 300.0
+      },
+      "resolution": [
+        128,
+        128
+      ],
+      "root_tolerance": 1e-10
+    },
+    "integration": {
+      "atol": 1e-14,
+      "escape_radius": 400.0,
+      "horizon_epsilon": 0.001,
+      "initial_step": 0.05,
+      "max_affine": 1500.0,
+      "max_step": 0.5,
+      "max_steps": 200000,
+      "min_step": 1e-12,
+      "null_tolerance": 0.00001,
+      "rtol": 1e-12
+    },
+    "output": "results/source_to_detector",
+    "postprocess": {
+      "basis": "Arrival",
+      "counts_per_white": 4,
+      "end": null,
+      "playback_fps": 30,
+      "start": null,
+      "time_bin_width": 1.0
+    },
+    "source": {
+      "direction": {
+        "CartesianSpatial": [
+          -1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "local_energy": 1.0,
+      "pattern": {
+        "RectangularGrid": {
+          "nu": 64,
+          "nv": 64
+        }
+      },
+      "plane": {
+        "center": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "e_u": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "e_v": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "height": 32.0,
+        "normal": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "width": 32.0
+      },
+      "t_emit": 0.0
+    },
+    "spin": 0.6
+  },
+  "experiment_id": "visualize-1789452273.871530",
+  "max_errors": {
+    "E_relative": 0.0,
+    "Lz_relative": 0.0,
+    "Q_abs": 4.169748990534572e-10,
+    "Q_relative": 7.43248822119821e-12,
+    "null_abs": 1.8531864043325186e-8
+  },
+  "outcomes": {
+    "Active": 0,
+    "Captured": 330,
+    "Detected": 3502,
+    "Escaped": 264,
+    "NumericalFailure": 0
+  },
+  "physics_seconds": 3.9641895,
+  "plane_map": "X=sqrt(r*r+a*a)sin(theta)cos(phi), Y=sqrt(r*r+a*a)sin(theta)sin(phi), Z=r*cos(theta), T=t_BL; NOT Kerr-Schild",
+  "ray_count": 4096,
+  "schema_version": 3,
+  "time_convention": "continuous f64 t_BL; delta_t=t_hit-t_emit; frame FPS is presentation only"
+}

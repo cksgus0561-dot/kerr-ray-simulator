@@ -1,0 +1,3 @@
+# Use Cargo's normal crates.io source and the existing Cargo.lock.
+# First setup requires network access: cargo fetch --locked.
+# Once dependencies are cached, the documented --offline commands still work.
