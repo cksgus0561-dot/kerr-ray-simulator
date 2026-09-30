@@ -1,5 +1,14 @@
 # Kerr Ray — Kerr 영측지선 연구용 3D 시각화와 검출 데이터
 
+## Program guides / 프로그램 사용설명서
+
+- [Korean User Guide: PROGRAM_GUIDE_KO.md](PROGRAM_GUIDE_KO.md)
+- [English User Guide: PROGRAM_GUIDE_EN.md](PROGRAM_GUIDE_EN.md)
+
+처음 clone한 경우 위 설명서의 설치·실행 절차를 따른다. 아래의 과거 결과 폴더 예시는
+저장소에 포함되지 않을 수 있다. 설명서에는 현재 GUI, 단일/batch 실행, 자동 저장과
+재현 방법, 현재 알려진 테스트 실패도 구분해 정리했다.
+
 Rust **v0.3.0**. 검증된 Milestone 1–3의 CPU f64 엔진을 일반적인
 Boyer–Lindquist(BL) 3+1차원 운동과 광원면·흡수형 검출면으로 확장했다.
 원본 연속시간 검출 이벤트에서 count 배열, 누적 PNG, 시간분해 PNG와 APNG를 만든다.
