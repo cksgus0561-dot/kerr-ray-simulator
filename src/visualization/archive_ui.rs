@@ -1,4 +1,5 @@
 //! Folder browsing performs IO only. Reproduce is dispatched to the reference worker.
+use super::i18n::{Language, collapsing, header};
 use crate::standard_run::{self, Comparison};
 use eframe::egui;
 use std::{path::PathBuf, sync::mpsc};
@@ -61,7 +62,12 @@ impl ArchiveUi {
             let _ = tx.send(result);
         });
     }
-    pub fn show(&mut self, ui: &mut egui::Ui, busy: bool) -> Option<(PathBuf, String)> {
+    pub fn show(
+        &mut self,
+        ui: &mut egui::Ui,
+        busy: bool,
+        lang: Language,
+    ) -> Option<(PathBuf, String)> {
         if let Some(rx) = &self.pending {
             match rx.try_recv() {
                 Ok(result) => {
@@ -85,22 +91,22 @@ impl ArchiveUi {
             }
         }
         let mut request = None;
-        egui::CollapsingHeader::new("Standard simulation archive")
+        header(ui, lang, "Standard simulation archive")
             .default_open(true)
             .show(ui, |ui| {
-                ui.label("Auto-save root (new calculations only)");
+                ui.label(lang.text("Auto-save root (new calculations only)"));
                 ui.text_edit_singleline(&mut self.auto_save_root);
-                ui.label(&self.save_message);
-                ui.label("Simulation folder path");
+                ui.label(lang.diagnostic(&self.save_message));
+                ui.label(lang.text("Simulation folder path"));
                 ui.text_edit_singleline(&mut self.folder);
                 if ui
-                    .add_enabled(!busy, egui::Button::new("Load Folder"))
+                    .add_enabled(!busy, egui::Button::new(lang.text("Load Folder")))
                     .clicked()
                 {
                     self.load(PathBuf::from(&self.folder), None);
                 }
                 if let Some(dir) = &self.loaded_folder {
-                    ui.small(format!("Loaded folder: {}", dir.display()));
+                    ui.small(lang.text(&format!("Loaded folder: {}", dir.display())));
                 }
                 let old = self.selected.clone();
                 ui.add_enabled_ui(!busy, |ui| {
@@ -121,11 +127,11 @@ impl ArchiveUi {
                 {
                     self.load(dir, Some(self.selected.clone()));
                 }
-                ui.small(&self.message);
+                ui.small(lang.diagnostic(&self.message));
                 if ui
                     .add_enabled(
                         self.valid && self.pending.is_none() && !busy,
-                        egui::Button::new("Reproduce selected simulation"),
+                        egui::Button::new(lang.text("Reproduce selected simulation")),
                     )
                     .clicked()
                 {
@@ -142,34 +148,34 @@ impl ArchiveUi {
                         } else {
                             egui::Color32::LIGHT_RED
                         },
-                        if r.passed() {
+                        lang.text(if r.passed() {
                             "Reproduction PASS"
                         } else {
                             "Reproduction FAIL"
-                        },
+                        }),
                     );
-                    ui.label(format!(
+                    ui.label(lang.text(&format!(
                         "Rays: {} / {}\nray_id mismatches: {}\nstatus mismatches: {}",
                         r.rays,
                         r.expected_rays,
                         r.id_mismatches + r.stored_id_mismatches,
                         r.status_mismatches
-                    ));
-                    ui.small(format!(
+                    )));
+                    ui.small(lang.text(&format!(
                         "Stored IDs checked: {} / {}",
                         r.stored_ids_checked, r.expected_rays
-                    ));
+                    )));
                     if r.initial_conditions_hash_verified {
-                        ui.label(
+                        ui.label(lang.text(
                             "Initial conditions SHA-256: PASS; seed regenerated; no stored ray IDs",
-                        );
+                        ));
                     } else if r.stored_ids_checked != r.expected_rays {
-                        ui.label("Stored IDs NOT VERIFIED (legacy file)");
+                        ui.label(lang.text("Stored IDs NOT VERIFIED (legacy file)"));
                     }
                     for (i, name) in ["u_hit", "v_hit", "t_hit"].iter().enumerate() {
-                        ui.label(format!("{name} max error: {:.3e}", r.hit_max_abs[i]));
+                        ui.label(lang.text(&format!("{name} max error: {:.3e}", r.hit_max_abs[i])));
                     }
-                    ui.label("Stored / reproduced");
+                    ui.label(lang.text("Stored / reproduced"));
                     for (i, name) in [
                         "Active",
                         "Detected",
@@ -181,12 +187,14 @@ impl ArchiveUi {
                     .enumerate()
                     {
                         ui.label(format!(
-                            "{name}: {} / {}",
-                            r.expected_counts[i], r.actual_counts[i]
+                            "{}: {} / {}",
+                            lang.text(name),
+                            r.expected_counts[i],
+                            r.actual_counts[i]
                         ));
                     }
-                    ui.collapsing("Full comparison", |ui| {
-                        ui.monospace(r.summary());
+                    collapsing(ui, lang, "Full comparison", |ui| {
+                        ui.monospace(lang.text(&r.summary()));
                     });
                 }
             });

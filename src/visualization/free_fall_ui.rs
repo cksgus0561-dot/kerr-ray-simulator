@@ -1,4 +1,5 @@
 //! Independent visualization worker/cache/clock. Never submits a ray calculation.
+use super::i18n::{Language, collapsing, header, numeric};
 use super::{
     free_fall::{Cache, DURATION, flow},
     geometry::Segment,
@@ -147,42 +148,47 @@ impl FreeFall {
         }
         true
     }
-    pub fn show(&mut self, ui: &mut egui::Ui, view: &mut crate::session::ViewConfig) {
-        egui::CollapsingHeader::new("Kerr Free-Fall Grid (visualization only)").default_open(true).show(ui,|ui| {
-            ui.checkbox(&mut view.visibility[0],"Cartesian Reference Grid");
-            ui.checkbox(&mut view.visibility[10],"Frame Dragging");
+    pub fn show(
+        &mut self,
+        ui: &mut egui::Ui,
+        view: &mut crate::session::ViewConfig,
+        lang: Language,
+    ) {
+        header(ui, lang, "Kerr Free-Fall Grid (visualization only)").default_open(true).show(ui,|ui| {
+            ui.checkbox(&mut view.visibility[0],lang.text("Cartesian Reference Grid"));
+            ui.checkbox(&mut view.visibility[10],lang.text("Frame Dragging"));
             let cfg = &mut view.free_fall;
-            ui.checkbox(&mut cfg.visible,"Kerr Free-Fall Grid");
-            ui.small("E=1, Lz=0 rain observers; connected markers, not moving space or a Euclidean embedding.");
-            ui.horizontal(|ui| {
-                ui.add(egui::DragValue::new(&mut cfg.extent).range(3.0..=100.0).speed(0.2).prefix("Extent "));
-                ui.add(egui::DragValue::new(&mut cfg.density).range(3..=17).prefix("Nodes/axis "));
+            ui.checkbox(&mut cfg.visible,lang.text("Kerr Free-Fall Grid"));
+            ui.small(lang.text("E=1, Lz=0 rain observers; connected markers, not moving space or a Euclidean embedding."));
+            ui.horizontal_wrapped(|ui| {
+                numeric(ui, lang, egui::DragValue::new(&mut cfg.extent).range(3.0..=100.0).speed(0.2).prefix(lang.text("Extent ")));
+                numeric(ui, lang, egui::DragValue::new(&mut cfg.density).range(3..=17).prefix(lang.text("Nodes/axis ")));
             });
-            ui.add(egui::DragValue::new(&mut cfg.speed).range(0.01..=100.).speed(0.1).prefix("Grid M / wall s "));
-            ui.horizontal(|ui| {
-                if ui.add_enabled(self.cache.is_some(),egui::Button::new(if self.playing {"Pause grid"} else {"Play grid"})).clicked() {
+            numeric(ui, lang, egui::DragValue::new(&mut cfg.speed).range(0.01..=100.).speed(0.1).prefix(lang.text("Grid M / wall s ")));
+            ui.horizontal_wrapped(|ui| {
+                if ui.add_enabled(self.cache.is_some(),egui::Button::new(lang.text(if self.playing {"Pause grid"} else {"Play grid"}))).clicked() {
                     if self.time>=DURATION {self.reset();}
                     self.playing = !self.playing;
                 }
-                if ui.button("Reset grid").clicked() {self.reset();}
+                if ui.button(lang.text("Reset grid")).clicked() {self.reset();}
             });
-            ui.label(format!("Grid t_BL/M {:.3} / {DURATION}; cache builds {}",self.time,self.builds));
-            if self.pending {ui.label("Precomputing free-fall cache (not ray physics)...");}
-            if let Some(e)=&self.error {ui.colored_label(egui::Color32::LIGHT_RED,e);}
+            ui.label(lang.text(&format!("Grid t_BL/M {:.3} / {DURATION}; cache builds {}",self.time,self.builds)));
+            if self.pending {ui.label(lang.text("Precomputing free-fall cache (not ray physics)..."));}
+            if let Some(e)=&self.error {ui.colored_label(egui::Color32::LIGHT_RED,lang.diagnostic(e.as_str()));}
             if let Some(c)=&self.cache {
-                ui.small(format!("chi {}; visible nodes {}/{}; initial exclusions {}; cache {:.3}s",
-                    c.kerr.spin(),self.positions.iter().flatten().count(),c.paths.len(),c.excluded_initial,c.seconds));
-                ui.collapsing("Free-fall metric diagnostics",|ui| {
-                    ui.label(format!("max sampled |g(u,u)+1| {:.3e}",c.max_normalization_error));
+                ui.small(lang.text(&format!("chi {}; visible nodes {}/{}; initial exclusions {}; cache {:.3}s",
+                    c.kerr.spin(),self.positions.iter().flatten().count(),c.paths.len(),c.excluded_initial,c.seconds)));
+                collapsing(ui, lang, "Free-fall metric diagnostics",|ui| {
+                    ui.label(lang.text(&format!("max sampled |g(u,u)+1| {:.3e}",c.max_normalization_error)));
                     // One explicitly identified probe; not a second metric implementation.
                     let probe=c.paths.iter().enumerate().filter_map(|(i,p)|p.first().map(|q|(i,q[0])))
                         .min_by(|a,b|a.1.total_cmp(&b.1)).map(|p|p.0);
                     if let Some(i)=probe && let Some(q)=c.coordinate(i,self.time) && let Ok(f)=flow(c.kerr,q) {
-                        ui.label(format!("Probe {i}: r {:.5}, theta {:.5}, phi {:.5}",q[0],q[1],q[2]));
-                        ui.label(format!("dr/dt {:.5e}; dphi/dt {:.5e}",f.coordinate_velocity[0],f.coordinate_velocity[2]));
-                        ui.label(format!("t_BL slice gamma_rr/theta/phi: {:.5?}",f.spatial_diagonal));
-                    } else {ui.label("Initial probe removed at numerical horizon margin.");}
-                    ui.small("BL margin 0.02 M; axis excluded. Grid clock is independent of photon playback; hidden grid pauses. Reset restores ALL nodes.");
+                        ui.label(lang.text(&format!("Probe {i}: r {:.5}, theta {:.5}, phi {:.5}",q[0],q[1],q[2])));
+                        ui.label(lang.text(&format!("dr/dt {:.5e}; dphi/dt {:.5e}",f.coordinate_velocity[0],f.coordinate_velocity[2])));
+                        ui.label(lang.text(&format!("t_BL slice gamma_rr/theta/phi: {:.5?}",f.spatial_diagonal)));
+                    } else {ui.label(lang.text("Initial probe removed at numerical horizon margin."));}
+                    ui.small(lang.text("BL margin 0.02 M; axis excluded. Grid clock is independent of photon playback; hidden grid pauses. Reset restores ALL nodes."));
                 });
             }
         });

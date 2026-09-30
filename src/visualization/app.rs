@@ -1,4 +1,5 @@
 //! Native application; immutable simulation snapshots cross the worker boundary.
+use super::i18n::{collapsing, numeric};
 use super::{camera, detector_view::DetectorView, playback::Playback, renderer::Renderer, ui};
 use crate::{
     session::{DetectorMode, PlaybackMode, SessionConfig},
@@ -17,6 +18,7 @@ use std::{
 
 pub struct App {
     cfg: SessionConfig,
+    preferences: super::preferences::PreferencesUi,
     archive: super::archive_ui::ArchiveUi,
     worker: Worker,
     data: Option<Arc<SimulationData>>,
@@ -69,6 +71,12 @@ impl App {
         measure: Option<PathBuf>,
     ) -> Self {
         cc.egui_ctx.set_theme(egui::Theme::Dark);
+        cc.egui_ctx.style_mut_of(egui::Theme::Dark, |style| {
+            style.wrap_mode = Some(egui::TextWrapMode::Wrap);
+            style.explanation_tooltips = false; // Translated numeric help is attached below.
+        });
+        let preferences =
+            super::preferences::PreferencesUi::new(super::i18n::install_korean_font(&cc.egui_ctx));
         let state = cc
             .wgpu_render_state
             .clone()
@@ -99,6 +107,7 @@ impl App {
         let fit_next = cfg.view.fit_on_load;
         Self {
             cfg,
+            preferences,
             archive,
             worker,
             data: None,
@@ -382,15 +391,16 @@ impl eframe::App for App {
         self.measure(&ctx, dt);
         self.playback.tick(dt, self.cfg.view.playback_speed as f64);
         let old_key = self.cfg.physics_key();
-        egui::Panel::top("title").show(root,|ui|{ui.horizontal(|ui|{ui.heading("KERR / GEODESIC LAB");ui.separator();ui.label("CPU f64 physics  /  wgpu 3D");if self.busy{ui.spinner();ui.label(format!("{} / {} rays",self.worker.completed.load(Ordering::Relaxed),self.worker.total.load(Ordering::Relaxed)));}});ui.small("G = c = M = 1   |   +Z spin   |   Cartesian-like BL coordinates, not a Euclidean embedding or Kerr-Schild time");});
+        let lang = self.preferences.value.language;
+        egui::Panel::top("title").show(root,|ui|{ui.horizontal_wrapped(|ui|{ui.heading(lang.text("KERR / GEODESIC LAB"));ui.separator();ui.label(lang.text("CPU f64 physics  /  wgpu 3D"));if self.busy{ui.spinner();ui.label(lang.text(&format!("{} / {} rays",self.worker.completed.load(Ordering::Relaxed),self.worker.total.load(Ordering::Relaxed))));}});ui.small(lang.text("G = c = M = 1   |   +Z spin   |   Cartesian-like BL coordinates, not a Euclidean embedding or Kerr-Schild time"));});
         egui::Panel::bottom("playback").show(root, |ui| {
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 if ui
-                    .button(if self.playback.playing {
+                    .button(lang.text(if self.playback.playing {
                         "Pause"
                     } else {
                         "Play"
-                    })
+                    }))
                     .clicked()
                 {
                     if self.playback.time >= self.playback.range[1] {
@@ -398,29 +408,32 @@ impl eframe::App for App {
                     }
                     self.playback.playing = !self.playback.playing;
                 }
-                if ui.button("Stop").clicked() {
+                if ui.button(lang.text("Stop")).clicked() {
                     self.playback.reset();
                 }
-                if ui.button("Reset time").clicked() {
+                if ui.button(lang.text("Reset time")).clicked() {
                     self.playback.reset();
                 }
-                ui.add(
+                numeric(
+                    ui,
+                    lang,
                     egui::Slider::new(
                         &mut self.playback.time,
                         self.playback.range[0]..=self.playback.range[1],
                     )
-                    .text("t_BL / M")
+                    .text(lang.text("t_BL / M"))
                     .fixed_decimals(3),
                 );
             });
-            ui.label(&self.status);
+            ui.label(lang.diagnostic(&self.status));
         });
         egui::Panel::left("controls")
-            .default_size(310.)
+            .default_size(310.).min_size(240.).max_size(400.)
             .resizable(true)
             .show(root, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    if let Some((directory, simulation)) = self.archive.show(ui, self.busy) {
+                    self.preferences.show(ui);
+                    if let Some((directory, simulation)) = self.archive.show(ui, self.busy, lang) {
                         self.worker.submit(Request::Reproduce { directory, simulation, view: Box::new(self.cfg.clone()) });
                         self.busy = true;
                         self.loading = true;
@@ -429,18 +442,18 @@ impl eframe::App for App {
                         self.fit_next = true;
                     }
                     if self.data.as_ref().is_some_and(|d| !d.source_available) {
-                        ui.small("SourcePlane is not stored. Source controls define a NEW experiment only.");
+                        ui.small(lang.text("SourcePlane is not stored. Source controls define a NEW experiment only."));
                     }
-                    self.free_fall.show(ui, &mut self.cfg.view);
-                    ui::settings(ui, &mut self.cfg);
+                    self.free_fall.show(ui, &mut self.cfg.view, lang);
+                    ui::settings(ui, &mut self.cfg, lang);
                     if ui
-                        .button("Recompute with current physical settings")
+                        .button(lang.text("Recompute with current physical settings"))
                         .clicked()
                     {
                         self.submit();
                     }
                     ui.separator();
-                    ui.collapsing("Export (new filenames only)", |ui| {
+                    collapsing(ui, lang, "Export (new filenames only)", |ui| {
                         ui.text_edit_singleline(&mut self.export_path);
                         for (kind, label) in [
                             (0, "Screenshot"),
@@ -448,45 +461,43 @@ impl eframe::App for App {
                             (2, "Export current detector image + CSV"),
                             (3, "Save complete run + frame sequences"),
                         ] {
-                            if ui.button(label).clicked() {
+                            if ui.button(lang.text(label)).clicked() {
                                 self.export(kind, &ctx);
                             }
                         }
-                        ui.add(
-                            egui::DragValue::new(&mut self.cfg.trajectory_export_stride)
+                        numeric(ui, lang, egui::DragValue::new(&mut self.cfg.trajectory_export_stride)
                                 .range(1..=10000)
-                                .prefix("Trajectory export stride "),
-                        );
+                                .prefix(lang.text("Trajectory export stride ")));
                     });
                 });
             });
         egui::Panel::right("diagnostics")
-            .default_size(260.)
+            .default_size(260.).min_size(220.).max_size(400.)
             .resizable(true)
             .show(root, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    ui.heading("Observation");
-                    ui.label(&self.gpu);
+                    ui.heading(lang.text("Observation"));
+                    ui.label(lang.text(&self.gpu));
                     let avg = self.frames.iter().sum::<f64>() / self.frames.len().max(1) as f64;
-                    ui.label(format!(
+                    ui.label(lang.text(&format!(
                         "{:.1} FPS  |  {:.2} ms mean",
                         1. / avg,
                         avg * 1000.
-                    ));
+                    )));
                     if let Some(data) = &self.data {
-                        ui.label(format!(
+                        ui.label(lang.text(&format!(
                             "chi {:.4} | physical rays {}",
                             data.experiment.spin,
                             data.rays.len()
-                        ));
-                        ui.label(format!(
+                        )));
+                        ui.label(lang.text(&format!(
                             "Rendered trajectories {}",
                             self.renderer
                                 .rendered_ids
                                 .iter()
                                 .filter(|&&i| !data.rays[i].samples.is_empty())
                                 .count()
-                        ));
+                        )));
                         for (label, n) in [
                             "Active",
                             "Detected",
@@ -497,33 +508,29 @@ impl eframe::App for App {
                         .into_iter()
                         .zip(self.counts)
                         {
-                            ui.label(format!("{label}: {n}"));
+                            ui.label(format!("{}: {n}", lang.text(label)));
                         }
-                        ui.label(format!("Reference calculation: {:.3} s", data.seconds));
-                        ui.small(&data.trajectory_note);
+                        ui.label(lang.text(&format!("Reference calculation: {:.3} s", data.seconds)));
+                        ui.small(lang.text(&data.trajectory_note));
                         if data.rays.iter().all(|r| r.samples.is_empty()) {
                             ui.colored_label(
-                                egui::Color32::YELLOW,
-                                "TRAJECTORY UNAVAILABLE\nEvents and detector counts remain valid.",
+                                egui::Color32::YELLOW,lang.text("TRAJECTORY UNAVAILABLE\nEvents and detector counts remain valid."),
                             );
                         }
                         ui.separator();
                         let mut id = self.selected.unwrap_or(0);
-                        ui.horizontal(|ui| {
-                            ui.label("Ray ID");
-                            if ui
-                                .add(
-                                    egui::DragValue::new(&mut id)
-                                        .range(0..=data.rays.len().saturating_sub(1)),
-                                )
+                        ui.horizontal_wrapped(|ui| {
+                            ui.label(lang.text("Ray ID"));
+                            if numeric(ui, lang, egui::DragValue::new(&mut id)
+                                        .range(0..=data.rays.len().saturating_sub(1)))
                                 .changed()
                             {
                                 self.selected = Some(id);
                             }
-                            if ui.button("Select").clicked() {
+                            if ui.button(lang.text("Select")).clicked() {
                                 self.selected = Some(id);
                             }
-                            if ui.button("Clear").clicked() {
+                            if ui.button(lang.text("Clear")).clicked() {
                                 self.selected = None;
                             }
                         });
@@ -533,44 +540,44 @@ impl eframe::App for App {
                         {
                             ui.colored_label(
                                 egui::Color32::LIGHT_YELLOW,
-                                format!("Ray {} / {:?}", ray.ray_id, ray.status),
+                                lang.text(&format!("Ray {} / {}", ray.ray_id, lang.text(&format!("{:?}", ray.status)))),
                             );
                             if data.source_available {
-                                ui.label(format!("Launch u,v: {:.4?}", ray.source_uv));
+                                ui.label(lang.text(&format!("Launch u,v: {:.4?}", ray.source_uv)));
                             }
                             let k = crate::physics::kerr::Kerr::new(data.experiment.spin).unwrap();
                             let s = ray.initial;
-                            ui.label(format!(
+                            ui.label(lang.text(&format!(
                                 "Launch XYZ: {:.4?}",
                                 crate::physics::coordinates::bl_to_cartesian(k, s[1], s[6], s[2])
-                            ));
+                            )));
                             if let Some(direction) = ray.launch_direction {
-                                ui.label(format!("Cartesian direction: {direction:?}"));
+                                ui.label(lang.text(&format!("Cartesian direction: {direction:?}")));
                             } else if data.source_available {
-                                ui.label(format!(
+                                ui.label(lang.text(&format!(
                                     "Direction: {:?}",
                                     data.experiment.source.direction
-                                ));
+                                )));
                             }
-                            ui.label(format!("Stop: {}", ray.stop_reason));
+                            ui.label(lang.text(&format!("Stop: {}", lang.text(&ray.stop_reason))));
                             if let Some(e) = data.events.iter().find(|e| e.ray_id == ray.ray_id) {
-                                ui.label(format!(
+                                ui.label(lang.text(&format!(
                                     "u_hit {:.6}\nv_hit {:.6}\nt_hit {:.9}\ndelta_t {:.9}",
                                     e.u_hit, e.v_hit, e.t_hit, e.delta_t
-                                ));
+                                )));
                             } else {
-                                ui.label("No detector hit");
+                                ui.label(lang.text("No detector hit"));
                             }
-                            ui.label(format!(
+                            ui.label(lang.text(&format!(
                                 "Steps {} accepted / {} rejected",
                                 ray.accepted_steps, ray.rejected_steps
-                            ));
+                            )));
                             if let Some(error) = &ray.failure {
-                                ui.colored_label(egui::Color32::LIGHT_RED, error);
+                                ui.colored_label(egui::Color32::LIGHT_RED,lang.diagnostic(error.as_str()));
                             }
                         }
                     }
-                    ui.collapsing("Conservation / GPU cache", |ui| {
+                    collapsing(ui, lang, "Conservation / GPU cache", |ui| {
                         for (label, error) in [
                             "max |null|",
                             "max rel E",
@@ -581,36 +588,36 @@ impl eframe::App for App {
                         .into_iter()
                         .zip(self.errors)
                         {
-                            ui.label(format!("{label}: {error:.4e}"));
+                            ui.label(format!("{}: {error:.4e}", lang.text(label)));
                         }
-                        ui.label(format!(
+                        ui.label(lang.text(&format!(
                             "Ray uploads: {}\nGeometry uploads: {}",
                             self.renderer.ray_uploads, self.renderer.geometry_uploads
-                        ));
-                        ui.label(format!(
+                        )));
+                        ui.label(lang.text(&format!(
                             "Grid extent {:.2}, spacing {:.2}",
                             self.renderer.grid_values[0], self.renderer.grid_values[1]
-                        ));
-                        ui.label(format!(
+                        )));
+                        ui.label(lang.text(&format!(
                             "max sampled omega {:.6e} / M",
                             self.renderer.max_omega
-                        ));
+                        )));
                         let mut sorted = self.frames.iter().copied().collect::<Vec<_>>();
                         sorted.sort_by(f64::total_cmp);
                         if !sorted.is_empty() {
-                            ui.label(format!(
+                            ui.label(lang.text(&format!(
                                 "p95 frame {:.2} ms",
                                 sorted[sorted.len() * 95 / 100] * 1000.
-                            ));
+                            )));
                         }
                     });
                     if self.cfg.view.detector_panel && !self.detector.rgba.is_empty() {
                         ui.separator();
-                        ui.label(format!("Detector {:?}", self.cfg.view.detector_mode));
-                        ui.label(format!(
+                        ui.label(lang.text(&format!("Detector {}", lang.text(&format!("{:?}", self.cfg.view.detector_mode)))));
+                        ui.label(lang.text(&format!(
                             "Shown {} / total {} hits",
                             self.detector.displayed, self.detector.total
-                        ));
+                        )));
                         let width = ui.available_width();
                         ui.image((
                             self.renderer.detector_texture_id,
@@ -620,8 +627,7 @@ impl eframe::App for App {
                                     / self.detector.resolution[0] as f32,
                             ),
                         ));
-                        ui.small(
-                            "u right / v up; coordinate pixel counts. White level configurable.",
+                        ui.small(lang.text("u right / v up; coordinate pixel counts. White level configurable."),
                         );
                     }
                 });
@@ -634,12 +640,12 @@ impl eframe::App for App {
         }
         egui::CentralPanel::default().show(root,|ui|{
             ui.horizontal_wrapped(|ui|{
-                if ui.button("Fit scene").clicked(){self.fit_next=true;}
-                ui.toggle_value(&mut self.pan_drag,"Pan drag");
-                if ui.button("Reset camera").clicked(){self.cfg.camera=Default::default();self.fit_next=true;}
-                if ui.button("Kerr center").clicked(){self.cfg.camera.target=[0.;3];self.cfg.camera.distance=24.;}
-                if let Some(data)=&self.data{for(label,plane)in[("Source",&data.experiment.source.plane),("Detector",&data.experiment.detector.plane)]{if ui.add_enabled(label != "Source" || data.source_available, egui::Button::new(label)).clicked(){self.cfg.camera.target=plane.center.map(|x|x as f32);self.cfg.camera.distance=(plane.width.max(plane.height)*1.6)as f32;}}}
-            });ui.small("Drag: orbit / Pan drag  |  Wheel: zoom  |  Arrows: orbit  |  Shift+arrows: pan  |  +/-: zoom");
+                if ui.button(lang.text("Fit scene")).clicked(){self.fit_next=true;}
+                ui.toggle_value(&mut self.pan_drag,lang.text("Pan drag"));
+                if ui.button(lang.text("Reset camera")).clicked(){self.cfg.camera=Default::default();self.fit_next=true;}
+                if ui.button(lang.text("Kerr center")).clicked(){self.cfg.camera.target=[0.;3];self.cfg.camera.distance=24.;}
+                if let Some(data)=&self.data{for(label,plane)in[("Source",&data.experiment.source.plane),("Detector",&data.experiment.detector.plane)]{if ui.add_enabled(label != "Source" || data.source_available, egui::Button::new(lang.text(label))).clicked(){self.cfg.camera.target=plane.center.map(|x|x as f32);self.cfg.camera.distance=(plane.width.max(plane.height)*1.6)as f32;}}}
+            });ui.small(lang.text("Drag: orbit / Pan drag  |  Wheel: zoom  |  Arrows: orbit  |  Shift+arrows: pan  |  +/-: zoom"));
             let size=ui.available_size().max(egui::vec2(16.,16.));
             if !ctx.egui_wants_keyboard_input(){
                 let (movement,shift,zoom)=ctx.input(|i|{
