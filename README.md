@@ -1,5 +1,13 @@
 # 빛에 남은 흔적으로 회전하는 중력장 읽기
 
+<p align="center">
+  <img src="images/kerr_visualization_main.png" alt="Kerr 영측지선 3차원 시뮬레이션" width="1000">
+</p>
+
+<p align="center">
+  <img src="images/kerr_visualization_secondary.png" alt="Kerr 영측지선 3차원 시뮬레이션 검출면" width="1000">
+</p>
+
 ### 3차원 수치 시뮬레이션과 머신러닝을 이용한 회전정보 추정
 
 회전하는 질량 주위에서는 시공간 자체가 회전의 영향을 받으며, 그 안을 지나는 빛의 경로와 최종 검출 결과도 달라진다.
