@@ -97,7 +97,7 @@ $$
 회전량 표본은
 
 $$
-s = \operatorname{atanh}(\chi)
+s = \mathrm{atanh}(\chi)
 $$
 
 로 변환한 공간에서 균등하게 배치한다. 구체적으로
@@ -109,8 +109,7 @@ $$
 에 대해
 
 $$
-s_i =
-i\frac{\operatorname{atanh}(0.999)}{76},
+s_i = i\frac{\mathrm{atanh}(0.999)}{76},
 \qquad
 \chi_i = \tanh(s_i)
 $$
